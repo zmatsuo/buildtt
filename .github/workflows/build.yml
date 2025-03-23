@@ -29,7 +29,7 @@ jobs:
           path: |
             teraterm/libs
             teraterm/buildtools
-          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat') }}
+          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/download/cygwin_package/https%3a%2f%2fmirrors.kernel.org%2fsourceware%2fcygwin%2f/x86_64/setup.ini') }}
       - name: build
         run: |
           cd teraterm
@@ -67,4 +67,4 @@ jobs:
           path: |
             teraterm/libs
             teraterm/buildtools
-          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat') }}
+          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/download/cygwin_package/https%3a%2f%2fmirrors.kernel.org%2fsourceware%2fcygwin%2f/x86_64/setup.ini') }}
