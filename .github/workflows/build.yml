@@ -63,6 +63,7 @@ jobs:
       - name: Save libs
         id: cache-libs-save
         uses: actions/cache/save@v4
+        if: steps.cache-libs-restore.outputs.cache-hit != 'true'
         with:
           path: |
             teraterm/libs
