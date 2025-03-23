@@ -38,3 +38,16 @@ jobs:
           cmake --build . --config Release --target install
           cmake --build . --config Release --target inno_setup
           cmake --build . --config Release --target zip
+      - name: artifacts zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: zip
+          path: |
+            teraterm/build/teraterm*.exe
+      - name: artifacts installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: |
+            teraterm/build/teraterm*.zip
+
