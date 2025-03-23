@@ -19,9 +19,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: build
+      - name: checkout teraterm
         run: |
           git clone https://github.com/TeraTermProject/teraterm.git --depth 1 --branch main
+      - name: Restore cached libs
+        id: cache-libs-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            teraterm/libs
+            teraterm/buildtools
+          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat') }}
+      - name: build
+        run: |
           cd teraterm
           cd buildtools
           cmake -P install_sbapplocale.cmake
@@ -43,11 +53,18 @@ jobs:
         with:
           name: zip
           path: |
-            teraterm/build/teraterm*.exe
+            teraterm/build/teraterm*.zip
       - name: artifacts installer
         uses: actions/upload-artifact@v4
         with:
           name: installer
           path: |
-            teraterm/build/teraterm*.zip
-
+            teraterm/build/teraterm*.exe
+      - name: Save libs
+        id: cache-libs-save
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            teraterm/libs
+            teraterm/buildtools
+          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat') }}
