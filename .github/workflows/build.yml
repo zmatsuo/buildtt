@@ -15,6 +15,10 @@ env:
 
 jobs:
   build-teraterm:
+    strategy:
+      fail-fast: true
+      matrix:
+        arch: [win32, x64, arm64]
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -29,7 +33,7 @@ jobs:
           path: |
             teraterm/libs
             teraterm/buildtools
-          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/download/cygwin_package/https%3a%2f%2fmirrors.kernel.org%2fsourceware%2fcygwin%2f/x86_64/setup.ini') }}
+          key: cache-${{ matrix.arch }}-${{ hashFiles('teraterm/libs/download.cmake', 'teraterm/buildtools/download/cygwin_package/https%3a%2f%2fmirrors.kernel.org%2fsourceware%2fcygwin%2f/x86_64/setup.ini') }}
       - name: build
         run: |
           cd teraterm
@@ -39,11 +43,11 @@ jobs:
           cmake -P install_cygwin.cmake
           cd ..
           cd libs
-          cmake -DCMAKE_GENERATOR="Visual Studio 17 2022" -DARCHITECTURE=arm64 -P buildall.cmake
+          cmake -DCMAKE_GENERATOR="Visual Studio 17 2022" -DARCHITECTURE=${{ matrix.arch }} -P buildall.cmake
           cd ..
           mkdir build
           cd build
-          cmake .. -G "Visual Studio 17 2022" -A arm64
+          cmake .. -G "Visual Studio 17 2022" -A ${{ matrix.arch }}
           cmake --build . --config Release
           cmake --build . --config Release --target install
           cmake --build . --config Release --target inno_setup
@@ -51,13 +55,13 @@ jobs:
       - name: artifacts zip
         uses: actions/upload-artifact@v4
         with:
-          name: zip
+          name: ${{ matrix.arch }}-zip
           path: |
             teraterm/build/teraterm*.zip
       - name: artifacts installer
         uses: actions/upload-artifact@v4
         with:
-          name: installer
+          name: ${{ matrix.arch }}-installer
           path: |
             teraterm/build/teraterm*.exe
       - name: Save libs
@@ -68,4 +72,4 @@ jobs:
           path: |
             teraterm/libs
             teraterm/buildtools
-          key: cache-${{ hashFiles('teraterm/libs/*.cmake', 'teraterm/libs/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/*.bat', 'teraterm/buildtools/download/cygwin_package/https%3a%2f%2fmirrors.kernel.org%2fsourceware%2fcygwin%2f/x86_64/setup.ini') }}
+          key: cache-${{ matrix.arch }}-${{ hashFiles('teraterm/libs/download.cmake', 'teraterm/buildtools/download/cygwin_package/https%3a%2f%2fmirrors.kernel.org%2fsourceware%2fcygwin%2f/x86_64/setup.ini') }}
