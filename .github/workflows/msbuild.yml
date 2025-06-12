@@ -67,11 +67,11 @@ jobs:
       id: read_buildinfo
       shell: bash
       run: |
-        json_content=$(cat buildinfo.json | jq -c .)
+        json_content=$(cat buildtools/svnrev/build_config.json | jq -c .)
         echo "json=$json_content" >> $GITHUB_OUTPUT
 
-    - name: set vers
-      id: vers
+    - name: set vars
+      id: vars
       shell: bash
       run: |
         VERSION=${{ fromJson(steps.read_buildinfo.outputs.json).VERSION }}
@@ -151,11 +151,18 @@ jobs:
         wait-for-completion: true
         wait-for-completion-timeout-in-seconds: 1800
 
+    - name: rename portable signed zip
+      if: env.SIGNPATH_API_TOKEN != ''
+      shell: bash
+      run: |
+        SNAPSHOT_OUTPUT=${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
+        mv installer/Output/portable_signed/teraterm installer/Output/portable_signed/${SNAPSHOT_OUTPUT}
+
     - name: Upload artifacts (portable signed zip)
       if: env.SIGNPATH_API_TOKEN != ''
       uses: actions/upload-artifact@v4
       with:
-        name: portable_zip_signed
+        name: ${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
         path: |
           installer/Output/portable_signed
 
