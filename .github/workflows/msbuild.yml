@@ -63,6 +63,30 @@ jobs:
         cd buildtools/svnrev/
         perl svnrev.pl --root ../.. --header ../../teraterm/common/svnversion.h --cmake build_config.cmake --json build_config.json
 
+    - name: read buildinfo.json
+      id: read_buildinfo
+      shell: bash
+      run: |
+        json_content=$(cat buildinfo.json | jq -c .)
+        echo "json=$json_content" >> $GITHUB_OUTPUT
+
+    - name: set vers
+      id: vers
+      shell: bash
+      run: |
+        VERSION = ${{ fromJson(steps.read_buildinfo.outputs.json).VERSION }}
+        DATE_TIME = ${{ fromJson(steps.read_buildinfo.outputs.json).DATE }}-${{ fromJson(steps.read_buildinfo.outputs.json).TIME }}
+        VCSVERSION = ${{ fromJson(steps.read_buildinfo.outputs.json).GITVERSION }}
+        SNAPSHOT_OUTPUT=teraterm-${{ VERSION }}-${{ DATE_TIME }}-${{ VCSVERSION }}-snapshot
+        RELEASE_OUTPUT=teraterm-${{ VERSION }}
+        RELEASE = ${{ fromJson(steps.read_buildinfo.outputs.json).RELEASE }}
+        echo "SNAPSHOT_OUTPUT=${{ SNAPSHOT_OUTPUT }}"
+        echo "RELEASE_OUTPUT=${{ RELEASE_OUTPUT }}"
+        echo "RELEASE=${{ RELEASE }}"
+        echo "SNAPSHOT_OUTPUT=${{ SNAPSHOT_OUTPUT }}" >> $GITHUB_OUTPUT
+        echo "RELEASE_OUTPUT=${{ RELEASE_OUTPUT }}" >> $GITHUB_OUTPUT
+        echo "RELEASE=${{ RELEASE }}" >> $GITHUB_OUTPUT
+
 #    - name: build_script
 #      run: |
 #        chcp 932
