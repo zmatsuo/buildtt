@@ -1,0 +1,189 @@
+name: Build installer
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - vs-version: '17'
+            VS_VERSION: 2022
+            windows: windows-2022
+    runs-on: ${{ matrix.windows }}
+    env:
+      NOPAUSE: 1
+      VS_VERSION: ${{ matrix.VS_VERSION }}
+      ORGANIZATION_ID: 78e41f48-55fc-4f33-8ea5-08ac32f65ac8
+      PROJECT_SLUG: teraterm
+      SIGNING_POLICY_SLUG: test-signing
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+      with:
+        vs-version: ${{ matrix.vs-version }}
+
+    - name: Restore cached libs
+      id: cache-libs-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          libs
+          buildtools
+        key: cache-${{ matrix.VS_VERSION }}-${{ hashFiles('.github/workflows/msbuild.yml', 'buildtools/*.cmake', 'ci_scripts/*.cmake') }}
+        restore-keys: |
+            cache-${{ matrix.VS_VERSION }}-
+            cache-
+
+#    - uses: msys2/setup-msys2@v2
+#
+#    - name: install_cygwin
+#      run: |
+#        chcp 932
+#        buildtools/install_cygwin.bat
+#
+#    - name: install_innosetup
+#      run: |
+#        chcp 932
+#        buildtools/install_innosetup.bat
+#
+#    - name: build_script
+#      run: |
+#        chcp 932
+#        ci_scripts/build_appveyor_release_bat.bat
+#
+#    - name: Upload artifacts (zip)
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: zip-BUILD-${{ github.run_number }}-${{ github.run_id }}-VS${{ matrix.VS_VERSION }}
+#        path: |
+#          installer/Output/*.zip
+#          !installer/Output/*_pdb.zip
+#
+#    - name: Upload artifacts (pdb)
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: pdb-BUILD-${{ github.run_number }}-${{ github.run_id }}-VS${{ matrix.VS_VERSION }}
+#        path: |
+#          installer/Output/*_pdb.zip
+#
+#    - name: Upload artifacts (exe)
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: installer-BUILD-${{ github.run_number }}-${{ github.run_id }}-VS${{ matrix.VS_VERSION }}
+#        path: |
+#          installer/Output/*.exe
+#
+#    - name: Upload artifacts (sha256sum)
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: sha256sum-BUILD-${{ github.run_number }}-${{ github.run_id }}-VS${{ matrix.VS_VERSION }}
+#        path: |
+#          installer/Output/*.sha256sum
+#
+#    - name: Upload artifacts (sha512sum)
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: sha512sum-BUILD-${{ github.run_number }}-${{ github.run_id }}-VS${{ matrix.VS_VERSION }}
+#        path: |
+#          installer/Output/*.sha512sum
+
+    - name: Upload artifacts for sign (tareterm_portable.zip)
+      if: env.SIGNPATH_API_TOKEN != ''
+      id: upload-portable
+      uses: actions/upload-artifact@v4
+      with:
+        name: portable_unsigned
+        path: |
+          installer/Output/portable
+
+    - name: sign portable zip
+      if: env.SIGNPATH_API_TOKEN != ''
+      uses: signpath/github-action-submit-signing-request@v1
+      with:
+        api-token: '${{ env.SIGNPATH_API_TOKEN }}'
+        organization-id: '${{ env.ORGANIZATION_ID }}'
+        project-slug: '${{ env.PROJECT_SLUG }}'
+        signing-policy-slug: '${{ env.SIGNING_POLICY_SLUG }}'
+        artifact-configuration-slug: 'teraterm_portable'
+        github-artifact-id: '${{steps.upload-portable.outputs.artifact-id}}'
+        output-artifact-directory: 'installer/Output/portable_signed'
+        wait-for-completion: true
+        wait-for-completion-timeout-in-seconds: 1800
+
+    - name: Upload artifacts (portable signed zip)
+      if: env.SIGNPATH_API_TOKEN != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: portable_zip_signed
+        path: |
+          installer/Output/portable_signed
+
+    - name: unsigned setup
+      if: env.SIGNPATH_API_TOKEN != ''
+      run: |
+        cmake -P installer/iscc_signed.cmake
+
+    - name: Upload artifacts for sign (setup.exe)
+      if: env.SIGNPATH_API_TOKEN != ''
+      id: upload-setup
+      uses: actions/upload-artifact@v4
+      with:
+        name: setup_unsigned
+        path: |
+          installer/Output/setup
+
+    - name: sign setup
+      if: env.SIGNPATH_API_TOKEN != ''
+      uses: signpath/github-action-submit-signing-request@v1
+      with:
+        api-token: '${{ env.SIGNPATH_API_TOKEN }}'
+        organization-id: '${{ env.ORGANIZATION_ID }}'
+        project-slug: '${{ env.PROJECT_SLUG }}'
+        signing-policy-slug: '${{ env.SIGNING_POLICY_SLUG }}'
+        artifact-configuration-slug: 'ziped_installer'
+        github-artifact-id: '${{steps.upload-setup.outputs.artifact-id}}'
+        output-artifact-directory: 'installer/Output/setup_signed'
+        wait-for-completion: true
+        wait-for-completion-timeout-in-seconds: 1800
+
+    - name: Upload artifacts (signed setup)
+      if: env.SIGNPATH_API_TOKEN != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: setup_signed
+        path: |
+          installer/Output/setup_signed
+
+    - name: Calculate cache hash
+      id: cache_hash
+      shell: bash
+      run: |
+        HASH_OUTPUT=${{ hashFiles('.github/workflows/msbuild.yml', 'buildtools/*.cmake', 'ci_scripts/*.cmake') }}
+        echo "hash_value=$HASH_OUTPUT" >> $GITHUB_OUTPUT
+
+    - name: pre_cache
+      run: |
+        chcp 932
+        ci_scripts/build_appveyor_release_bat_pre_cache.bat
+
+    - name: save cache
+      if: steps.cache-libs-restore.outputs.cache-hit != 'true'   # restore時keyが完全に一致したときtrue
+      id: cache-libs-save
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          libs
+          buildtools
+        key: cache-${{ matrix.VS_VERSION }}-${{ steps.cache_hash.outputs.hash_value }}
+
