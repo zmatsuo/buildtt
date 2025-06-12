@@ -156,7 +156,7 @@ jobs:
       shell: bash
       run: |
         SNAPSHOT_OUTPUT=${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
-        mv installer/Output/portable_signed/teraterm installer/Output/portable_signed/${SNAPSHOT_OUTPUT}
+        mv installer/Output/portable_signed/teraterm installer/Output/portable_signed/$SNAPSHOT_OUTPUT
 
     - name: Upload artifacts (portable signed zip)
       if: env.SIGNPATH_API_TOKEN != ''
@@ -199,7 +199,7 @@ jobs:
       shell: bash
       run: |
         SNAPSHOT_OUTPUT=${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
-        mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/portable_signed/${SNAPSHOT_OUTPUT}.exe
+        mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/portable_signed/$SNAPSHOT_OUTPUT.exe
 
     - name: Upload artifacts (signed setup)
       if: env.SIGNPATH_API_TOKEN != ''
