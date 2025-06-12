@@ -74,18 +74,18 @@ jobs:
       id: vers
       shell: bash
       run: |
-        VERSION = ${{ fromJson(steps.read_buildinfo.outputs.json).VERSION }}
-        DATE_TIME = ${{ fromJson(steps.read_buildinfo.outputs.json).DATE }}-${{ fromJson(steps.read_buildinfo.outputs.json).TIME }}
-        VCSVERSION = ${{ fromJson(steps.read_buildinfo.outputs.json).GITVERSION }}
-        SNAPSHOT_OUTPUT=teraterm-${{ VERSION }}-${{ DATE_TIME }}-${{ VCSVERSION }}-snapshot
-        RELEASE_OUTPUT=teraterm-${{ VERSION }}
-        RELEASE = ${{ fromJson(steps.read_buildinfo.outputs.json).RELEASE }}
-        echo "SNAPSHOT_OUTPUT=${{ SNAPSHOT_OUTPUT }}"
-        echo "RELEASE_OUTPUT=${{ RELEASE_OUTPUT }}"
-        echo "RELEASE=${{ RELEASE }}"
-        echo "SNAPSHOT_OUTPUT=${{ SNAPSHOT_OUTPUT }}" >> $GITHUB_OUTPUT
-        echo "RELEASE_OUTPUT=${{ RELEASE_OUTPUT }}" >> $GITHUB_OUTPUT
-        echo "RELEASE=${{ RELEASE }}" >> $GITHUB_OUTPUT
+        VERSION=${{ fromJson(steps.read_buildinfo.outputs.json).VERSION }}
+        DATE_TIME=${{ fromJson(steps.read_buildinfo.outputs.json).DATE }}-${{ fromJson(steps.read_buildinfo.outputs.json).TIME }}
+        VCSVERSION=${{ fromJson(steps.read_buildinfo.outputs.json).GITVERSION }}
+        SNAPSHOT_OUTPUT=teraterm-${VERSION}-${DATE_TIME}-${VCSVERSION}-snapshot
+        RELEASE_OUTPUT=teraterm-${VERSION}
+        RELEASE=${{ fromJson(steps.read_buildinfo.outputs.json).RELEASE }}
+        echo "SNAPSHOT_OUTPUT=${SNAPSHOT_OUTPUT}"
+        echo "RELEASE_OUTPUT=${RELEASE_OUTPUT}"
+        echo "RELEASE=${RELEASE}"
+        echo "SNAPSHOT_OUTPUT=${SNAPSHOT_OUTPUT}" >> $GITHUB_OUTPUT
+        echo "RELEASE_OUTPUT=${RELEASE_OUTPUT}" >> $GITHUB_OUTPUT
+        echo "RELEASE=${RELEASE}" >> $GITHUB_OUTPUT
 
 #    - name: build_script
 #      run: |
