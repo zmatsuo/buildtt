@@ -57,6 +57,12 @@ jobs:
 #        chcp 932
 #        buildtools/install_innosetup.bat
 #
+
+    - name: build_config
+      shell: bash
+      run: |
+        cd buildtools/svnrev/perl svnrev.pl --root ../.. --header ../../teraterm/common/svnversion.h --cmake build_config.cmake --json build_config.json
+
 #    - name: build_script
 #      run: |
 #        chcp 932
