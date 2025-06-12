@@ -162,7 +162,7 @@ jobs:
       if: env.SIGNPATH_API_TOKEN != ''
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
+        name: ${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}_portable
         path: |
           installer/Output/portable_signed
 
@@ -194,11 +194,18 @@ jobs:
         wait-for-completion: true
         wait-for-completion-timeout-in-seconds: 1800
 
+    - name: rename signed setup
+      if: env.SIGNPATH_API_TOKEN != ''
+      shell: bash
+      run: |
+        SNAPSHOT_OUTPUT=${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
+        mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/portable_signed/${SNAPSHOT_OUTPUT}.exe
+
     - name: Upload artifacts (signed setup)
       if: env.SIGNPATH_API_TOKEN != ''
       uses: actions/upload-artifact@v4
       with:
-        name: setup_signed
+        name: ${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}_setup
         path: |
           installer/Output/setup_signed
 
