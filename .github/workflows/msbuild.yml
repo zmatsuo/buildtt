@@ -166,9 +166,10 @@ jobs:
 
     - name: rename portable signed zip
       if: env.SIGNPATH_API_TOKEN != ''
+      shell: bash
       run: |
-        OUTPUT=${{ steps.vars.outputs.OUTPUT }}
-        mv installer/Output/portable_signed/teraterm "installer/Output/portable_signed/$OUTPUT"
+        OUTPUT="${{ steps.vars.outputs.OUTPUT }}"
+        mv installer/Output/portable_signed/teraterm "installer/Output/portable_signed/${OUTPUT}"
 
     - name: Upload artifacts (portable signed zip)
       if: env.SIGNPATH_API_TOKEN != ''
@@ -208,8 +209,9 @@ jobs:
 
     - name: rename signed setup
       if: env.SIGNPATH_API_TOKEN != ''
+      shell: bash
       run: |
-        OUTPUT_EXE=${{ steps.vars.outputs.OUTPUT_EXE }}
+        OUTPUT_EXE="${{ steps.vars.outputs.OUTPUT_EXE }}"
         mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/portable_signed/$OUTPUT_EXE
 
     - name: Upload artifacts (signed setup)
