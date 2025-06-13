@@ -80,12 +80,25 @@ jobs:
         SNAPSHOT_OUTPUT=teraterm-${VERSION}-${DATE_TIME}-${VCSVERSION}-snapshot
         RELEASE_OUTPUT=teraterm-${VERSION}
         RELEASE=${{ fromJson(steps.read_buildinfo.outputs.json).RELEASE }}
-        echo "SNAPSHOT_OUTPUT=${SNAPSHOT_OUTPUT}"
-        echo "RELEASE_OUTPUT=${RELEASE_OUTPUT}"
-        echo "RELEASE=${RELEASE}"
+        if [ "$RELEASE" = "0" ]; then
+          OUTPUT=${SNAPSHOT_OUTPUT}
+        else
+          OUTPUT=${RELEASE_OUTPUT}
+        fi
+        OUTPUT_ZIP=${OUTPUT}_ZIP
+        OUTPUT_EXE=${OUTPUT}_EXE
         echo "SNAPSHOT_OUTPUT=${SNAPSHOT_OUTPUT}" >> $GITHUB_OUTPUT
         echo "RELEASE_OUTPUT=${RELEASE_OUTPUT}" >> $GITHUB_OUTPUT
         echo "RELEASE=${RELEASE}" >> $GITHUB_OUTPUT
+        echo "OUTPUT=${OUTPUT}" >> $GITHUB_OUTPUT
+        echo "OUTPUT_ZIP=${OUTPUT_ZIP}" >> $GITHUB_OUTPUT
+        echo "OUTPUT_EXE=${OUTPUT_EXE}" >> $GITHUB_OUTPUT
+        echo "SNAPSHOT_OUTPUT=${SNAPSHOT_OUTPUT}"
+        echo "RELEASE_OUTPUT=${RELEASE_OUTPUT}"
+        echo "RELEASE=${RELEASE}"
+        echo "OUTPUT=${OUTPUT}"
+        echo "OUTPUT_ZIP=${OUTPUT_ZIP}"
+        echo "OUTPUT_EXE=${OUTPUT_EXE}"
 
 #    - name: build_script
 #      run: |
@@ -155,14 +168,14 @@ jobs:
       if: env.SIGNPATH_API_TOKEN != ''
       shell: bash
       run: |
-        SNAPSHOT_OUTPUT=${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
-        mv installer/Output/portable_signed/teraterm installer/Output/portable_signed/$SNAPSHOT_OUTPUT
+        OUTPUT=${{ steps.vars.outputs.OUTPUT }}
+        mv installer/Output/portable_signed/teraterm "installer/Output/portable_signed/$OUTPUT"
 
     - name: Upload artifacts (portable signed zip)
       if: env.SIGNPATH_API_TOKEN != ''
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}_portable
+        name: ${{ steps.vars.outputs.OUTPUT_ZIP }}
         path: |
           installer/Output/portable_signed
 
@@ -198,14 +211,14 @@ jobs:
       if: env.SIGNPATH_API_TOKEN != ''
       shell: bash
       run: |
-        SNAPSHOT_OUTPUT=${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}
-        mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/portable_signed/$SNAPSHOT_OUTPUT.exe
+        OUTPUT_EXE=${{ steps.vars.outputs.OUTPUT_EXE }}
+        mv installer/Output/setup_signed/teraterm-unsigned.exe "installer/Output/portable_signed/$OUTPUT_EXE"
 
     - name: Upload artifacts (signed setup)
       if: env.SIGNPATH_API_TOKEN != ''
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.vars.outputs.SNAPSHOT_OUTPUT }}_setup
+        name: ${{ steps.vars.outputs.OUTPUT_EXE }}
         path: |
           installer/Output/setup_signed
 
