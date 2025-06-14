@@ -237,9 +237,9 @@ jobs:
         mkdir installer/Output/release
         cp installer/Output/setup_signed/${OUTPUT}.exe installer/Output/release
         pushd installer/Output/portable_signed
-        cmake -E tar cvf ../release/${OUTPUT}.zip ${OUTPUT}
+        cmake -E tar cf ../release/${OUTPUT}.zip ${OUTPUT}
         popd
-        cp installer/Output/*_pdb.zip installer/Output/release
+        #cp installer/Output/*_pdb.zip installer/Output/release
         pushd installer/Output/release
         sha256sum *.zip *.exe > ${OUTPUT}.sha256sum
         sha512sum *.zip *.exe > ${OUTPUT}.sha512sum
