@@ -212,7 +212,10 @@ jobs:
       shell: bash
       run: |
         OUTPUT_EXE="${{ steps.vars.outputs.OUTPUT_EXE }}"
-        mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/portable_signed/$OUTPUT_EXE
+        ls installer/Output/setup_signed/
+        echo mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/setup_signed/$OUTPUT_EXE
+        mv installer/Output/setup_signed/teraterm-unsigned.exe installer/Output/setup_signed/$OUTPUT_EXE
+        ls installer/Output/setup_signed/
 
     - name: Upload artifacts (signed setup)
       if: env.SIGNPATH_API_TOKEN != ''
